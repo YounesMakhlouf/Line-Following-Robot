@@ -4,11 +4,14 @@
 #define in3 8
 #define in4 7
 #define enB 5
-#define R_S 13
-#define C_S 2
-#define L_S 12
+#define R_S A5
+#define C_S A4
+#define L_S A3
 #define L A0
-#define R 0
+#define R A1
+#define threshold (950+20)/2
+#define MAX_SPEED_A 150
+#define MAX_SPEED_B 190
 
 void setup() {
   Serial.begin(9600);
@@ -21,41 +24,54 @@ void setup() {
   pinMode(R_S, INPUT);
   pinMode(L_S, INPUT);
   pinMode(C_S, INPUT);
-  pinMode(C, INPUT);
+  pinMode(R, INPUT);
   pinMode(L, INPUT);
   digitalWrite(in1,LOW);
   digitalWrite(in2,LOW);
   digitalWrite(in3,LOW);
   digitalWrite(in4,LOW);
-  analogWrite(enA,255);
-  analogWrite(enB,255);
+  analogWrite(enA,MAX_SPEED_A);
+  analogWrite(enB,MAX_SPEED_B);
   delay(1000);
 }
 
 void loop(){
-  Serial.print(digitalRead(L_S));
-  Serial.print(digitalRead(C_S));
-  Serial.print(digitalRead(R_S));
+  int line1 = read_eye(L_S);
+  int line2 = read_eye(C_S);
+  int line3 = read_eye(R_S);
+  int line4 = read_eye(L);
+  int line5 = read_eye(R);
+
+   Serial.print(analogRead(L));
+  Serial.print( " || ");  
+  Serial.print(analogRead(L_S));
+  Serial.print( " || ");
+   Serial.print(analogRead(C_S));
+  Serial.print( " || "); 
+   Serial.print(analogRead(R_S));
+  Serial.print( " || "); 
+  Serial.print(analogRead(R));
+  Serial.print( " || ");
   Serial.println();
-  if ((digitalRead(L_S) == 1) && (digitalRead(C_S) == 0) && (digitalRead(R_S) == 1))
+  
+  if ((line1 == 1) && (line2 == 0) && (line3 == 1))
     forward();
-  if ((digitalRead(L_S) == 0) && (digitalRead(C_S) == 1) && (digitalRead(R_S) == 1))
+  if ((line1 == 0) && (line2 == 1) && (line3 == 1))
     turnRight();
-  if ((digitalRead(L_S) == 1) && (digitalRead(C_S) == 1) && (digitalRead(R_S) == 0))
+  if ((line1 == 1) && (line2 == 1) && (line3 == 0))
     turnLeft();
-  if ((digitalRead(L_S) == 1) && (digitalRead(C_S) == 1) && (digitalRead(R_S) == 1))
+  if ((line1 == 1) && (line2 == 1) && (line3 == 1))
     stop();
 //LES ANGLES
-
-  if ((digitalRead(L_S) == 0) && (digitalRead(C_S) == 0) && (digitalRead(R_S) == 1) && (digitalRead(R) == 1) && (digitalRead(L) == 0))
+  
+  if ((line1 == 0) && (line2 == 0) && (line3 == 1))
     turnRight();//probleme ici 
-  if ((digitalRead(L_S) == 1) && (digitalRead(C_S) == 0) && (digitalRead(R_S) == 0) && (digitalRead(R) == 0) && (digitalRead(L) == 1))
+  if ((line1 == 1) && (line2 == 0) && (line3 == 0))
     turnLeft();
 //noeud +
-  if ((digitalRead(L_S) == 0) && (digitalRead(C_S) == 0) && (digitalRead(R_S) == 0) && (digitalRead(R) == 0) && (digitalRead(L) == 0))
+  if ((line1 == 0) && (line2 == 0) && (line3 == 0) && (line4 == 0) && (line5 == 0))
     forward();
-}
-
+  }
 void forward(){ 
   digitalWrite(in1, LOW); 
   digitalWrite(in2, HIGH); 
@@ -82,4 +98,9 @@ void stop(){
   digitalWrite(in2, LOW);
   digitalWrite(in3, LOW);
   digitalWrite(in4, LOW);
+}
+int read_eye(int eye) {
+ int line = analogRead(eye);
+ if (line < threshold) return 0;
+ return 1;
 }
