@@ -10,8 +10,10 @@
 #define L A0
 #define R A1
 #define threshold (950+20)/2
-#define MAX_SPEED_A 150
-#define MAX_SPEED_B 190
+#define MAX_SPEED_A 120
+#define MAX_SPEED_B 130
+
+#define TURNING_SPEED 170
 
 void setup() {
   Serial.begin(9600);
@@ -41,38 +43,42 @@ void loop(){
   int line3 = read_eye(R_S);
   int line4 = read_eye(L);
   int line5 = read_eye(R);
-
-   Serial.print(analogRead(L));
+  /*Serial.print(analogRead(L));
   Serial.print( " || ");  
   Serial.print(analogRead(L_S));
   Serial.print( " || ");
-   Serial.print(analogRead(C_S));
+  Serial.print(analogRead(C_S));
   Serial.print( " || "); 
-   Serial.print(analogRead(R_S));
+  Serial.print(analogRead(R_S));
   Serial.print( " || "); 
   Serial.print(analogRead(R));
   Serial.print( " || ");
-  Serial.println();
-  
+  Serial.println();*/
   if ((line1 == 1) && (line2 == 0) && (line3 == 1))
     forward();
+
   if ((line1 == 0) && (line2 == 1) && (line3 == 1))
     turnRight();
+ 
   if ((line1 == 1) && (line2 == 1) && (line3 == 0))
     turnLeft();
-  if ((line1 == 1) && (line2 == 1) && (line3 == 1))
-    stop();
-//LES ANGLES
+
+    
   
-  if ((line1 == 0) && (line2 == 0) && (line3 == 1))
-    turnRight();//probleme ici 
-  if ((line1 == 1) && (line2 == 0) && (line3 == 0))
-    turnLeft();
+//LES ANGLES
+  if ((line1 == 0) && (line2 == 0) && (line3 == 1) && (line4 ==0) && (line5==1))
+    powerRight(); 
+  if ((line1 == 1) && (line2 == 0) && (line3 == 0) && (line4==1) && (line5==0))
+    powerLeft();
 //noeud +
   if ((line1 == 0) && (line2 == 0) && (line3 == 0) && (line4 == 0) && (line5 == 0))
     forward();
+ /* if ((line1 == 0) && (line2 == 0)  && (line4 == 1) && (line3 == 0) && (line5 == 0))
+    turnLeft();*/
   }
+
 void forward(){ 
+  changeSpeed(MAX_SPEED_A, MAX_SPEED_B);
   digitalWrite(in1, LOW); 
   digitalWrite(in2, HIGH); 
   digitalWrite(in3, LOW); 
@@ -80,6 +86,7 @@ void forward(){
 }
 
 void turnRight(){
+  changeSpeed(MAX_SPEED_A, MAX_SPEED_B);
   digitalWrite(in1, LOW);
   digitalWrite(in2, HIGH);
   digitalWrite(in3, HIGH);
@@ -87,7 +94,24 @@ void turnRight(){
 }
 
 void turnLeft(){
+  changeSpeed(MAX_SPEED_A, MAX_SPEED_B);
   digitalWrite(in1, HIGH);
+  digitalWrite(in2, LOW);
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, HIGH);
+}
+
+void powerRight(){
+  changeSpeed(MAX_SPEED_A, TURNING_SPEED);
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
+  digitalWrite(in3, HIGH);
+  digitalWrite(in4, LOW);
+}
+
+void powerLeft(){
+ changeSpeed(TURNING_SPEED, MAX_SPEED_B);
+ digitalWrite(in1, HIGH);
   digitalWrite(in2, LOW);
   digitalWrite(in3, LOW);
   digitalWrite(in4, HIGH);
@@ -99,8 +123,13 @@ void stop(){
   digitalWrite(in3, LOW);
   digitalWrite(in4, LOW);
 }
+
 int read_eye(int eye) {
- int line = analogRead(eye);
- if (line < threshold) return 0;
- return 1;
+  if (analogRead(eye) < threshold) return 0;
+  return 1;
+}
+
+void changeSpeed(int speed_a, int speed_b) {
+ analogWrite(enA, speed_a); 
+ analogWrite(enB, speed_b); 
 }
