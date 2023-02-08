@@ -10,8 +10,8 @@
 #define L A0
 #define R A1
 #define threshold (950+20)/2
-#define MAX_SPEED_A 120
-#define MAX_SPEED_B 130
+#define MAX_SPEED_A 125
+#define MAX_SPEED_B 135
 
 #define TURNING_SPEED 170
 
