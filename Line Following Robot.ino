@@ -9,10 +9,11 @@
 #define L_S A3
 #define L A0
 #define R A1
+
+// Analog sensor threshold and motor speeds
 #define threshold (950+20)/2
 #define MAX_SPEED_A 125
 #define MAX_SPEED_B 135
-
 #define TURNING_SPEED 170
 
 void setup() {
@@ -38,6 +39,7 @@ void setup() {
 }
 
 void loop(){
+  // Read values from line sensors
   int line1 = read_eye(L_S);
   int line2 = read_eye(C_S);
   int line3 = read_eye(R_S);
@@ -54,6 +56,8 @@ void loop(){
   Serial.print(analogRead(R));
   Serial.print( " || ");
   Serial.println();*/
+
+  // Line following logic
   if ((line1 == 1) && (line2 == 0) && (line3 == 1))
     forward();
 
@@ -65,18 +69,27 @@ void loop(){
 
     
   
-//LES ANGLES
+  // Angle handling
   if ((line1 == 0) && (line2 == 0) && (line3 == 1) && (line4 ==0) && (line5==1))
     powerRight(); 
   if ((line1 == 1) && (line2 == 0) && (line3 == 0) && (line4==1) && (line5==0))
     powerLeft();
-//noeud +
+
+  // Handle node "+"
   if ((line1 == 0) && (line2 == 0) && (line3 == 0) && (line4 == 0) && (line5 == 0))
     forward();
  /* if ((line1 == 0) && (line2 == 0)  && (line4 == 1) && (line3 == 0) && (line5 == 0))
     turnLeft();*/
   }
 
+
+// Read analog sensor and return LineState
+int read_eye(int eye) {
+  if (analogRead(eye) < threshold) return 0;
+  return 1;
+}
+
+// Motor control functions
 void forward(){ 
   changeSpeed(MAX_SPEED_A, MAX_SPEED_B);
   digitalWrite(in1, LOW); 
@@ -122,11 +135,6 @@ void stop(){
   digitalWrite(in2, LOW);
   digitalWrite(in3, LOW);
   digitalWrite(in4, LOW);
-}
-
-int read_eye(int eye) {
-  if (analogRead(eye) < threshold) return 0;
-  return 1;
 }
 
 void changeSpeed(int speed_a, int speed_b) {
